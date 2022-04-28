@@ -73,6 +73,7 @@ class MeshroomApp(QApplication):
                             help='Save the created scene.')
         parser.add_argument('-p', '--pipeline', metavar='MESHROOM_FILE/photogrammetry/panoramaHdr/panoramaFisheyeHdr', type=str, default=os.environ.get("MESHROOM_DEFAULT_PIPELINE", "photogrammetry"),
                             help='Override the default Meshroom pipeline with this external graph.')
+        parser.add_argument("--submitLabel", metavar='SUBMITLABEL', type=str, help="Label of a node in the submitter", default='meshroom : %j')
         parser.add_argument("--verbose", help="Verbosity level", default='warning',
                             choices=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],)
 
@@ -122,7 +123,7 @@ class MeshroomApp(QApplication):
         # instantiate Reconstruction object
         self._undoStack = commands.UndoStack(self)
         self._taskManager = TaskManager(self)
-        r = Reconstruction(undoStack=self._undoStack, taskManager=self._taskManager, defaultPipeline=args.pipeline, parent=self)
+        r = Reconstruction(undoStack=self._undoStack, taskManager=self._taskManager, defaultPipeline=args.pipeline, submitLabel=args.submitLabel, parent=self)
         self.engine.rootContext().setContextProperty("_reconstruction", r)
 
         # those helpers should be available from QML Utils module as singletons, but:

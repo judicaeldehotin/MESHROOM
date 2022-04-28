@@ -62,6 +62,10 @@ parser.add_argument('--forceCompute', help='Compute in all cases even if already
 
 parser.add_argument('--submit', help='Submit on renderfarm instead of local computation.',
                     action='store_true')
+parser.add_argument("--submitLabel", 
+                    type=str, 
+                    default='meshroom : %j',
+                    help="Label of a node in the submitter")
 parser.add_argument('--submitter',
                     type=str,
                     default='SimpleFarm',
@@ -219,7 +223,7 @@ if args.submit:
     if not args.save:
         raise ValueError('Need to save the project to file to submit on renderfarm.')
     # submit on renderfarm
-    meshroom.core.graph.submit(args.save, args.submitter, toNode=toNodes)
+    meshroom.core.graph.submit(args.save, args.submitter, toNode=toNodes, submitLabel=args.submitLabel)
 elif args.compute:
     # start computation
     meshroom.core.graph.executeGraph(graph, toNodes=toNodes, forceCompute=args.forceCompute, forceStatus=args.forceStatus)
