@@ -29,10 +29,17 @@ class SplitDoubleFisheye(desc.CommandLineNode):
 
     outputs = [
         desc.File(
-            name='output',
-            label='Output SfMData File',
-            description='Path to the output sfmdata file',
-            value=desc.Node.internalFolder + 'cameras.sfm',
+            name='output1',
+            label='First Output SfMData File',
+            description='Path to the output sfmdata file for the first part',
+            value=desc.Node.internalFolder + 'cameras_part1.sfm',
+            uid=[],
+        ),
+        desc.File(
+            name='output2',
+            label='Second Output SfMData File',
+            description='Path to the output sfmdata file for the second part',
+            value=desc.Node.internalFolder + 'cameras_part2.sfm',
             uid=[],
         )
     ]
