@@ -1,9 +1,9 @@
-from math import acos, pi, sqrt
+from math import acos, pi, sqrt, atan2
 
 from PySide2.QtCore import QObject, Slot, QSize, Signal, QPointF
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.Qt3DRender import Qt3DRender
-from PySide2.QtGui import QVector3D, QQuaternion, QVector2D, QVector4D, QMatrix4x4
+from PySide2.QtGui import QVector3D, QQuaternion, QVector2D, QVector4D, QMatrix4x4, QMatrix3x3
 
 from meshroom.ui.utils import makeProperty
 
@@ -108,6 +108,37 @@ class TrackballController(QObject):
 class Transformations3DHelper(QObject):
 
     # ---------- Exposed to QML ---------- #
+
+    @Slot(QVector3D, QVector3D, result=QQuaternion)
+    def rotationBetweenAandB(self, A, B):
+
+        A = A/A.length()
+        B = B/B.length()
+        
+        # Get rotation matrix between 2 vectors
+        v = QVector3D.crossProduct(A, B)
+        s = v.length()
+        c = QVector3D.dotProduct(A, B)
+        M = QQuaternion.fromAxisAndAngle(v / s, atan2(s, c) * 180 / pi).toRotationMatrix()
+
+        x = QVector3D(M(0, 0), M(0, 1), M(0, 2))
+        y = QVector3D(M(1, 0), M(1, 1), M(1, 2))
+        z = QVector3D(M(2, 0), M(2, 1), M(2, 2))
+
+        fx = QVector3D(1, 0, 0)
+        y = QVector3D.crossProduct(z, x).normalized()
+        x = QVector3D.crossProduct(y, z).normalized()
+        z = QVector3D.crossProduct(x, y).normalized()
+        
+        M = QMatrix3x3([x.x(), x.y(), x.z(), y.x(), y.y(), y.z(), z.x(), z.y(), z.z()])
+
+        return QQuaternion.fromRotationMatrix(M)
+
+    @Slot(QQuaternion, float, float, float, result = QVector3D)
+    def updateEulers(self, quat, previous_pitch, previous_yaw, previous_roll):
+
+        init = QQuaternion.fromEulerAngles(previous_pitch, previous_yaw, previous_roll)
+        return (quat * init).toEulerAngles()
 
     @Slot(QVector4D, Qt3DRender.QCamera, QSize, result=QVector2D)
     def pointFromWorldToScreen(self, point, camera, windowSize):
