@@ -59,9 +59,9 @@ AliceVision.PanoramaViewer {
     property var xStart : 0
     property var yStart : 0
 
-    property double previous_yaw: 0;
-    property double previous_pitch: 0;
-    property double previous_roll: 0;
+    property var previous_yaw: 0;
+    property var previous_pitch: 0;
+    property var previous_roll: 0;
 
     property double yaw: 0;
     property double pitch: 0;
@@ -136,40 +136,43 @@ AliceVision.PanoramaViewer {
 
                     // Rotate Panorama
                     if (isRotating && isEditable) {
-                        var xoffset = mouse.x - lastX;
-                        var yoffset = mouse.y - lastY;
+
+                        var nx = Math.max(0, mouse.x)
+                        var nx = Math.min(width - 1, mouse.x)
+                        var ny = Math.max(0, mouse.y)
+                        var ny = Math.min(height - 1, mouse.y)
+
+                        var xoffset = nx - lastX;
+                        var yoffset = ny - lastY;
 
                         if (xoffset != 0 || yoffset !=0)
                         {
-                            
                             var latitude_start = (yStart / height) * Math.PI - (Math.PI / 2);
                             var longitude_start = ((xStart / width) * 2 * Math.PI) - Math.PI;
-
-                            var Px_start = Math.cos(latitude_start) * Math.sin(longitude_start);
-                            var Py_start = Math.sin(latitude_start);
-                            var Pz_start = Math.cos(latitude_start) * Math.cos(longitude_start);
-
-                            var nx = Math.max(0, mouse.x)
-                            var nx = Math.min(width - 1, mouse.x)
-                            var ny = Math.max(0, mouse.y)
-                            var ny = Math.min(height - 1, mouse.y)
-
                             var latitude_end = (ny / height) * Math.PI - ( Math.PI / 2);
                             var longitude_end = ((nx / width) * 2 * Math.PI) - Math.PI;
-                            var Px_end = Math.cos(latitude_end) * Math.sin(longitude_end);
-                            var Py_end = Math.sin(latitude_end);
-                            var Pz_end = Math.cos(latitude_end) * Math.cos(longitude_end);
 
-                            var A = Qt.vector3d(Px_start, Py_start, Pz_start)
-                            var B = Qt.vector3d(Px_end, Py_end, Pz_end)     
-                            
-                            var quat = Transformations3DHelper.rotationBetweenAandB(A, B)
-                            
-                            var result = Transformations3DHelper.updateEulers(quat, previous_pitch, previous_yaw, previous_roll)
+                            var start_pt = Qt.vector2d(latitude_start, longitude_start)
+                            var end_pt = Qt.vector2d(latitude_end, longitude_end)
 
-                            root.pitch = result.x
-                            root.yaw = result.y
-                            root.roll = result.z                         
+                            var previous_euler = Qt.vector3d(previous_yaw, previous_pitch, previous_roll)
+
+                            if (mouse.modifiers & Qt.ControlModifier)
+                            {
+                                var result = Transformations3DHelper.updatePanoramaInPlane(previous_euler, start_pt, end_pt)
+                                root.pitch = result.x
+                                root.yaw = result.y
+                                root.roll = result.z  
+                            }
+                            else
+                            {
+                                var result = Transformations3DHelper.updatePanorama(previous_euler, start_pt, end_pt)
+                                root.pitch = result.x
+                                root.yaw = result.y
+                                root.roll = result.z  
+                            }
+
+                                                  
                         }
 
                         _reconstruction.setAttribute(activeNode.attribute("manualTransform.manualRotation.x"), Math.round(root.pitch));
@@ -187,9 +190,9 @@ AliceVision.PanoramaViewer {
                     xStart = mouse.x;
                     yStart = mouse.y;
 
-                    previous_pitch = pitch
-                    previous_roll = roll
-                    previous_yaw = yaw
+                    previous_yaw = yaw;
+                    previous_pitch = pitch;
+                    previous_roll = roll;
                 }
 
                 onReleased: {
