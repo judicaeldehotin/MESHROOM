@@ -162,6 +162,13 @@ The metadata needed are:
             value=os.environ.get('ALICEVISION_SENSOR_DB', ''),
             uid=[],
         ),
+        desc.File(
+            name='colorProfileDatabase',
+            label='Color Profile Database',
+            description='''Color Profile database directory path.''',
+            value=os.environ.get('ALICEVISION_COLOR_PROFILE_DB', ''),
+            uid=[],
+        ),
         desc.FloatParam(
             name='defaultFieldOfView',
             label='Default Field Of View',
@@ -201,6 +208,13 @@ The metadata needed are:
             name='useInternalWhiteBalance',
             label='Apply internal white balance',
             description='Apply image white balance (Only for raw images)',
+            value=True,
+            uid=[0],
+        ),
+        desc.BoolParam(
+            name='noColorProfileIsError',
+            label='No Color Profile Throw Error',
+            description='If a color profile database is specified but no color profile is found for at least one image, then an error is thrown',
             value=True,
             uid=[0],
         ),
