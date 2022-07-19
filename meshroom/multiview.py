@@ -265,9 +265,9 @@ def panoramaHdrPipeline(graph):
                                        )
 
     panoramaCompositing = graph.addNewNode('PanoramaCompositing',
-                                           input=panoramaSeams.input,
+                                           input=panoramaSeams.outputSfm,
                                            warpingFolder=panoramaSeams.warpingFolder,
-                                           labels=panoramaSeams.output
+                                           labels=panoramaSeams.output,
                                         )
 
     panoramaMerging = graph.addNewNode('PanoramaMerging',
